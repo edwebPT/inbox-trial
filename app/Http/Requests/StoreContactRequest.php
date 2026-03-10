@@ -19,6 +19,8 @@ class StoreContactRequest extends FormRequest
     {
         return [
             'name.required' => 'Name is required.',
+            'name.string' => 'Subject must be a string.',
+            'name.max' => 'Subject may not be greater than 255 characters.',
             'email.required' => 'Email is required.',
             'email.email' => 'Email must be valid.',
             'email.unique' => 'This email is already registered.',
