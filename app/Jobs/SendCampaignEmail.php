@@ -2,48 +2,67 @@
 
 namespace App\Jobs;
 
+use App\Models\Campaign;
 use App\Models\CampaignSend;
+use App\Models\Contact;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
-class SendCampaignEmail implements ShouldQueue
+class SendCampaignsEmail implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public Campaign $campaign;
 
-    public function __construct(
-        private readonly int $campaignSendId
-    ) {}
-
-    public function handle(): void
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(Campaign $campaign)
     {
-        $send = CampaignSend::find($this->campaignSendId);
-
-        if (!$send) {
-            return;
-        }
-
-        try {
-            $this->sendEmail($send->contact->email, $send->campaign->subject, $send->campaign->body);
-
-            $send->update(['status' => 'sent']);
-
-        } catch (\Exception $e) {
-            $send->update([
-                'status'        => 'failed',
-                'error_message' => $e->getMessage(),
-            ]);
-
-            Log::error('Campaign send failed', ['send_id' => $send->id, 'error' => $e->getMessage()]);
-        }
+        $this->campaign = $campaign;
     }
 
-    private function sendEmail(string $to, string $subject, string $body): void
+    /**
+     * Execute the job.
+     */
+    public function handle(): void
     {
-        Log::info("Sending email to {$to}: {$subject}");
+        // Get all active contacts for the campaign's contact list
+        $contacts = $this->campaign->contactList
+            ->contacts()
+            ->where('status', 'active')
+            ->get();
+
+        foreach ($contacts as $contact) {
+            try {
+                // Send email (replace with your mailable)
+                Mail::raw($this->campaign->body, function ($message) use ($contact) {
+                    $message->to($contact->email)
+                        ->subject('Campaign: ' . $this->campaign->subject);
+                });
+
+                // Record as sent
+                CampaignSend::create([
+                    'campaign_id' => $this->campaign->id,
+                    'contact_id' => $contact->id,
+                    'status' => 'sent',
+                ]);
+            } catch (\Exception $e) {
+                // Record as failed
+                CampaignSend::create([
+                    'campaign_id' => $this->campaign->id,
+                    'contact_id' => $contact->id,
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Update campaign status
+        $this->campaign->update(['status' => 'sent']);
     }
 }

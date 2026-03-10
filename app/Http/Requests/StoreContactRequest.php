@@ -15,4 +15,14 @@ class StoreContactRequest extends FormRequest
             'status' => 'required|in:subscribed,unsubscribed',
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email must be valid.',
+            'email.unique' => 'This email is already registered.',
+            'status.in' => 'Status must be either active or unsubscribed.',
+        ];
+    }
 }

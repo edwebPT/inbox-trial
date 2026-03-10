@@ -16,4 +16,17 @@ class StoreCampaignRequest extends FormRequest
             'scheduled_at' => 'nullable|date',
         ];
     }
+    public function messages(): array
+    {
+        return [
+            'subject.required' => 'Subject is required.',
+            'subject.string' => 'Subject must be a string.',
+            'subject.max' => 'Subject may not be greater than 255 characters.',
+            'body.required' => 'Body is required.',
+            'body.string' => 'Body must be a string.',
+            'contact_list_id.required' => 'Contact list is required.',
+            'contact_list_id.exists' => 'Selected contact list does not exist.',
+            'scheduled_at.date' => 'Scheduled at must be a valid date.',
+        ];
+    }
 }

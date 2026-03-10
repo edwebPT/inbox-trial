@@ -11,4 +11,10 @@ class StoreContactListRequest extends FormRequest
     {
         return ['name' => 'required|string|max:255'];
     }
+    public function messages(): array
+    {
+        return [
+            'name.required' => 'Name is required.'
+        ];
+    }
 }
