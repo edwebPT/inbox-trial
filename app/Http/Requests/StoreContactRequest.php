@@ -6,21 +6,24 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreContactRequest extends FormRequest
 {
-    public function authorize() { return true; }
-    public function rules()
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:contacts,email',
-            'status' => 'required|in:subscribed,unsubscribed',
+            'status' => 'nullable|in:active,unsubscribed', // optional, defaults to 'active'
         ];
     }
+
     public function messages(): array
     {
         return [
             'name.required' => 'Name is required.',
-            'name.string' => 'Subject must be a string.',
-            'name.max' => 'Subject may not be greater than 255 characters.',
             'email.required' => 'Email is required.',
             'email.email' => 'Email must be valid.',
             'email.unique' => 'This email is already registered.',

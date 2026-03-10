@@ -2,52 +2,37 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Campaign;
-use App\Services\CampaignService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreCampaignRequest;
-use App\Http\Resources\CampaignResource;
+use App\Models\Campaign;
+use App\Services\CampaignService;
+use Illuminate\Http\Request;
 
 class CampaignController extends Controller
 {
-
     public function index()
     {
-        $campaigns = Campaign::withCount([
-            'sends as pending_count' => fn($q)=>$q->where('status','pending'),
-            'sends as sent_count' => fn($q)=>$q->where('status','sent'),
-            'sends as failed_count' => fn($q)=>$q->where('status','failed'),
-        ])->paginate(15);
-
-        return CampaignResource::collection($campaigns);
+        // Return campaigns as plain array (no data wrapper)
+        return response()->json(Campaign::with('contactList')->get());
     }
 
-    public function store(StoreCampaignRequest $request, CampaignService $service)
+    public function store(StoreCampaignRequest $request)
     {
-        $campaign = $service->create($request->validated());
-
-        return new CampaignResource($campaign);
+        $campaign = Campaign::create($request->validated());
+        return response()->json($campaign, 201);
     }
 
     public function show($id)
     {
-        $campaign = Campaign::withCount([
-            'sends as pending_count' => fn($q)=>$q->where('status','pending'),
-            'sends as sent_count' => fn($q)=>$q->where('status','sent'),
-            'sends as failed_count' => fn($q)=>$q->where('status','failed'),
-        ])->findOrFail($id);
-
-        return new CampaignResource($campaign);
+        $campaign = Campaign::with('contactList')->findOrFail($id);
+        return response()->json($campaign);
     }
 
-    public function dispatch($id, CampaignService $service)
+    public function dispatch($id)
     {
-        $campaign = Campaign::with('contactList.contacts')->findOrFail($id);
+        $campaign = Campaign::findOrFail($id);
+        app(CampaignService::class)->dispatch($campaign);
 
-        $service->dispatch($campaign);
-
-        return response()->json([
-            'message' => 'Campaign dispatched'
-        ]);
+        return response()->json(['message' => 'Campaign dispatched.']);
     }
 }

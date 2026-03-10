@@ -2,35 +2,40 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\Contact;
-use App\Services\ContactService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreContactRequest;
-use App\Http\Resources\ContactResource;
+use App\Models\Contact;
+use Illuminate\Http\JsonResponse;
 
 class ContactController extends Controller
 {
-
-    public function index()
+    public function store(StoreContactRequest $request): JsonResponse
     {
-        return ContactResource::collection(
-            Contact::paginate(15)
-        );
+        $contact = Contact::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'status' => $request->status ?? 'active', // default
+        ]);
+
+        return response()->json($contact, 201);
     }
 
-    public function store(StoreContactRequest $request, ContactService $service)
+    public function index(): JsonResponse
     {
-        $contact = $service->create($request->validated());
-
-        return new ContactResource($contact);
+        return response()->json(Contact::all());
     }
 
-    public function unsubscribe($id, ContactService $service)
+    public function unsubscribe($id): JsonResponse
     {
         $contact = Contact::findOrFail($id);
+        $contact->update(['status' => 'unsubscribed']);
 
-        $service->unsubscribe($contact);
+        return response()->json(['message' => 'Unsubscribed successfully']);
+    }
 
-        return new ContactResource($contact);
+    public function show($id): JsonResponse
+    {
+        $contact = Contact::findOrFail($id);
+        return response()->json($contact);
     }
 }

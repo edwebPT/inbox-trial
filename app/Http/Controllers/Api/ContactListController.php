@@ -2,42 +2,34 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Models\ContactList;
-use App\Services\ContactListService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreContactListRequest;
-use App\Http\Resources\ContactListResource;
+use App\Models\ContactList;
+use App\Models\Contact;
 use Illuminate\Http\Request;
 
 class ContactListController extends Controller
 {
-
     public function index()
     {
-        return ContactListResource::collection(
-            ContactList::withCount('contacts')->get()
-        );
+        // Return all contact lists as flat array
+        return response()->json(ContactList::all());
     }
 
-    public function store(StoreContactListRequest $request, ContactListService $service)
+    public function store(StoreContactListRequest $request)
     {
-        $list = $service->create($request->validated());
-
-        return new ContactListResource($list);
+        $list = ContactList::create($request->validated());
+        return response()->json($list, 201);
     }
 
-    public function addContact($id, Request $request, ContactListService $service)
+    public function addContact(Request $request, $id)
     {
-        $request->validate([
-            'contact_id' => 'required|exists:contacts,id'
-        ]);
-
+        $request->validate(['contact_id' => 'required|exists:contacts,id']);
         $list = ContactList::findOrFail($id);
+        $contact = Contact::findOrFail($request->contact_id);
 
-        $service->addContact($list, $request->contact_id);
+        $list->contacts()->syncWithoutDetaching($contact);
 
-        return response()->json([
-            'message' => 'Contact added to list'
-        ]);
+        return response()->json($list->contacts);
     }
 }
