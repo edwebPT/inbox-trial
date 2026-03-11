@@ -5,11 +5,9 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Contact;
 use App\Models\ContactList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ContactListApiTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_can_list_contact_lists()
     {

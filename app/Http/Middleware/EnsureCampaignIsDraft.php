@@ -10,7 +10,7 @@ class EnsureCampaignIsDraft
 {
     public function handle(Request $request, Closure $next)
     {
-        $campaign = Campaign::findOrFail($request->route('id')); // use 'id' not 'campaign'
+        $campaign = Campaign::findOrFail($request->route('id'));
 
         // Block if campaign is not draft
         if ($campaign->status !== 'draft') {

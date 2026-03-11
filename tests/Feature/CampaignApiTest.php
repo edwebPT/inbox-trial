@@ -5,11 +5,9 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Campaign;
 use App\Models\ContactList;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class CampaignApiTest extends TestCase
 {
-    use RefreshDatabase;
 
     public function test_can_list_campaigns()
     {

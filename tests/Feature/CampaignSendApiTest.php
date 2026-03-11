@@ -5,14 +5,12 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Campaign;
 use App\Services\CampaignService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 
 class CampaignSendApiTest extends TestCase
 {
-    use RefreshDatabase;
 
-    public function can_dispatch_campaign()
+    public function test_can_dispatch_campaign()
     {
         // Create a campaign
         $campaign = Campaign::factory()->create([

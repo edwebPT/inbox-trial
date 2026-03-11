@@ -2,16 +2,14 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use App\Models\Contact;
 
 class ContactApiTest extends TestCase
 {
-    use RefreshDatabase;
 
 
-    public function can_list_contacts()
+    public function test_can_list_contacts()
     {
         Contact::factory()->create(['name' => 'Alice']);
 
@@ -22,7 +20,7 @@ class ContactApiTest extends TestCase
     }
 
 
-    public function can_create_contact()
+    public function test_can_create_contact()
     {
         $payload = [
             'name' => 'John Doe',
@@ -41,7 +39,7 @@ class ContactApiTest extends TestCase
     }
 
 
-    public function can_unsubscribe_contact()
+    public function test_can_unsubscribe_contact()
     {
         $contact = Contact::factory()->create(['status' => 'active']);
 
